@@ -63,12 +63,9 @@ int gpio_pins_write[9]={23,3,4,17,8,22,10,9,5};
 void incase_of_sig(){
 
 	digitalWrite(27,LOW);
-	f_usage=fopen("usage.txt","w");
-	fprintf(f_usage,"%d %d %d %d %d %d %d %d %d",us[0],us[1],us[2],us[3],us[4],us[5],us[6],us[7],us[8]);
-        fclose(f_usage);
-//	f_stat=fopen("stat.txt","w");
-//	fprintf(f_stat,"%d %d %d %d %d %d %d %d %d",flag[0],flag[1],flag[2],flag[3],flag[4],flag[5],flag[6],flag[7],flag[8]);
-//	fclose(f_stat);
+	f_stat=fopen("stat.txt","w");
+	fprintf(f_stat,"%d %d %d %d %d %d %d %d %d",flag[0],flag[1],flag[2],flag[3],flag[4],flag[5],flag[6],flag[7],flag[8]);
+	fclose(f_stat);
 	exit(0);
 
 }
@@ -83,40 +80,19 @@ int main(int argc,char *argv[])
 	signal(SIGSEGV,incase_of_sig);
 	signal(SIGINT,incase_of_sig);
 	signal(SIGPIPE,incase_of_sig);
-	//struct val *value_read[10],*values_write[10];	
-	
 	f_stat=fopen("stat.txt","r");
 	fscanf(f_stat,"%d %d %d %d %d %d %d %d %d",&flag[0],&flag[1],&flag[2],&flag[3],&flag[4],&flag[5],&flag[6],&flag[7],&flag[8]);
 	fclose(f_stat);
 
-/*	for(i=0;i<10;i++)
-	{
-		values_read[i]=(struct val* )malloc(sizeof(struct val));
-		 values_write[i]=(struct val* )malloc(sizeof(struct val)); 	
-	}
 
-//	int gpio_pins_read[10]={18,6,13,19,26,12,16,20,21,14};
-//	int gpio_pins_write[10]={23,3,4,17,27,22,10,9,11,25};	
-
-
-	for(i=0;i<10;i++)
-	{
-		insert_values(values_read[i],gpio_pins_read[i],0,i);
-		insert_values(values_write[i],gpio_pins_write[i],0,i);
-	}
-
-*/
 	for(i=0;i<9;i++)
 
 	{
-		pinMode(gpio_pins_write[i], OUTPUT);     // Set regular LED as output
+		pinMode(gpio_pins_write[i], OUTPUT);  
     		pinMode(gpio_pins_read[i], INPUT);
-//		digitalWrite(gpio_pins_write[i],LOW);
+
 	}
 
-//		pinMode(27,OUTPUT);
-
-	
 	pthread_create(&pt1,NULL,fun1,NULL);
 	pthread_create(&pt2,NULL,fun2,NULL);	
 	pthread_create(&pt3,NULL,fun3,NULL);
@@ -132,10 +108,6 @@ void *fun1()
 	int ld=0;
 	fpp=fopen("/home/pi/id.txt","r");
 	fscanf(fpp,"%s",id);
-//	int us[9]={0,};
-//	printf("id - %s\n",id); 
-
-	
 	memset(recvBuff, '0',sizeof(recvBuff));
     if((sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
     {
@@ -208,9 +180,9 @@ void *fun1()
 							 flag[ld]=0;
 							f_usage=fopen("usage.txt","w");
                                                	        fscanf(f_usage,"%d %d %d %d %d %d %d %d %d",&us[0],&us[1],&us[2],&us[3],&us[4],&us[5],&us[6],&us[7],&us[8]);
-						//	printf("aa previous us - %d\n",us[ld]);
+						
 							us[ld]+=(stop[ld]-start[ld]);
-						//	printf("start :::: %d stop :::: %d us::::%d\n",start[ld],stop[ld],us[ld]);
+						
 							fprintf(f_usage,"%d %d %d %d %d %d %d %d %d",us[0],us[1],us[2],us[3],us[4],us[5],us[6],us[7],us[8]);
 							fclose(f_usage);
 						}
@@ -264,7 +236,7 @@ void *fun2()
 		pthread_create(&pt_gpio_write[i],NULL,gpio_write,values_write[i]);
 	}
 	
-//	pthread_create(&pt_gpio_write[0],NULL,gpio_write,values_write[0]);
+
 	pthread_exit(NULL);
 	
 	close(fd);
@@ -292,7 +264,7 @@ void *fun4()
 	char rcbuff[100]="";
 	int sockfdd;
 
-//		printf("In while\n");
+/
 	    if((sockfdd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
 	    {
 	        printf("\n Error : Could not create socket \n");
@@ -324,32 +296,28 @@ void *fun4()
 			digitalWrite(27,HIGH); 
 	write (sockfdd,"READERGROUP",12);usleep(100);
 	read(sockfdd,rcbuff,100);usleep(100);
-//	pinMode(27,OUTPUT);
+
 	while(1)
 	{
-//		write(sockfd,"HEARTBEATCK",12);
+
 		if(send(sockfdd,"HEARTBEATCK",12,MSG_NOSIGNAL) <= 0 )incase_of_sig();
 		usleep(100);
-//		read(sockfdd,rcbuff,100);
-//		printf("-- %s --" , rcbuff);	
-//		if(strcmp(rcbuff,"HEARTBEATCK")==0)
+
 		if(read(sockfdd,rcbuff,100)>0)
 		{
 			digitalWrite(27,HIGH);
-	//			printf("In yes");
+	
 		}
 		else
 		
 		{
 			digitalWrite(27,LOW);
-	//		printf("In no");
+	
 			incase_of_sig();
   		}
 		sleep(1);	
 	}
-//	if(write(sockfdd,"RCVQUITMESG",12)<0) incase_of_sig();
-						
-//	close(sockfdd);
+
 }	
 
 
@@ -358,35 +326,18 @@ void *fun4()
 
 void *gpio_read(struct val *temp)
 {
-
-//	 GPIO_USER_DATA gpio_data; 
-
-    //     memset(&gpio_data, 0, sizeof(gpio_data));
-
-
-//	 gpio_data.gpio_num=temp->pin_;
-  //       gpio_data.gpio_direction = 1;
-
-
 	while(1)
 	{
-			// GPIO_USER_DATA gpio_data; 
-
-                       // memset(&gpio_data, 0, sizeof(gpio_data));
-      
+			
                 pthread_mutex_lock(&lock);
-        //        gpio_data.gpio_num=temp->pin_;
-         //       gpio_data.gpio_direction = 1;
-  //              gpio_data.gpio_value = 1;       
-                
-              //  printf("The output value of GPIO %u = %u\n", gpio_data.gpio_num,gpio_data.gpio_value);
+        
                 usleep(10000);
 
                 if(digitalRead(temp->pin_))
                 {
                         if(flag[temp->ld_]==1) flag[temp->ld_]=0;
                         else if(flag[temp->ld_]==0)  flag[temp->ld_]=1;
-                  //	 printf("flag =  %d\n",flag[temp->ld_]);
+                 
                          usleep(10000);
 
 
@@ -400,38 +351,24 @@ void *gpio_read(struct val *temp)
 
 void *gpio_write(struct val *temp)
 {
-//	  GPIO_USER_DATA gpio_data;
-  //       memset(&gpio_data, 0, sizeof(gpio_data));
 
-    //    gpio_data.gpio_num=temp->pin_;
-      //  gpio_data.gpio_direction = 1;
 
 	while(1)
 	{
 
 			if(flag[temp->ld_]==1)
         	        {
-      //          	      printf("inside on\n");
-                        	pthread_mutex_lock(&lock);
-               		 //        printf("inside on\n");
-               		 //      gpio_data.gpio_num=temp->pin_;
-               		 //      gpio_data.gpio_direction = 1;
-//                       		 gpio_data.gpio_value = 1;       
-                       	//	 gpio_set_value(fd, &gpio_data);
+                             	pthread_mutex_lock(&lock);
+               		 
 				digitalWrite(temp->pin_, HIGH);
                        		 pthread_mutex_unlock(&lock);
 			 	 usleep(1000);
                		 }
                		 else
                		 {
-        //       		       printf("inside off\n");
+        
                        		 pthread_mutex_lock(&lock);
-               		   //      printf("inside off\n");
-
-               		   //    gpio_data.gpio_num=temp->pin_;
-                	   //   gpio_data.gpio_direction = 1;
-                       		// gpio_data.gpio_value = 0;       
-                       		 //gpio_set_value(fd, &gpio_data);
+               		   
 				digitalWrite(temp->pin_,LOW);
                         	pthread_mutex_unlock(&lock);
 				usleep(1000);    
