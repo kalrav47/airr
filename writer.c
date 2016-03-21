@@ -22,7 +22,7 @@ void main()
 	char url2[1024]="\0";
 	while(1){	
 			system("rm -rf l_version.txt");
-			system("wget http://181.224.157.140/status.txt  --header 'Host: www.airr.co.in' -nc --timeout=1 -O l_version.txt");
+			system("curl --header 'Host: www.airr.co.in' 'http://181.224.157.140/hello.php' > l_version.txt");
 			
 			if(!(f_net= fopen("l_version.txt","r")))
 			{
@@ -84,7 +84,7 @@ void main()
 				read(sockfd,datar,256);
 				printf("--> %s\n",datar);
 
-				sprintf(url2,"curl http://www.airr.co.in/response.php?response_room=%s",datar);		
+				sprintf(url2,"curl --header 'Host: www.airr.co.in' http://181.224.157.140/response.php?response_room=%s",datar);		
 
 				system(url2);		
 
@@ -93,7 +93,7 @@ void main()
 				write(sockfd,"RCVQUITMESG",12);
 
 				close(sockfd);
-				system("curl http://www.airr.co.in/clear.php");
+				system("curl --header 'Host: www.airr.co.in' 'http://181.224.157.140/clear.php'");
 				system("rm -rf l_version.txt");
 			}
 	}	
