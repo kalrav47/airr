@@ -264,7 +264,7 @@ void *fun4()
 	char rcbuff[100]="";
 	int sockfdd;
 
-/
+
 	    if((sockfdd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
 	    {
 	        printf("\n Error : Could not create socket \n");
