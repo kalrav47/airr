@@ -76,7 +76,7 @@ public class AirrServer
                         for (iCount = 0; iCount < SwitchIds.size(); iCount++)
                         {
                             String id = SwitchIds.elementAt(iCount).toString();
-                            if (msgFromSwitchBoard.contains(id))
+                            if (msgFromSwitchBoard.contains(id.substring(0,9)))
                             {
                                 AcceptClient ac = Switches.get(iCount);
                                 Socket tSoc = (Socket) ClientSockets.elementAt(iCount);
