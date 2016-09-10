@@ -36,6 +36,7 @@ public class AirrServer
         DataInputStream din;
         DataOutputStream dout;
         String msgFromSwitchBoard = "";
+        String myId = "";
 
         AcceptClient(Socket CSoc) throws Exception
         {
@@ -67,19 +68,36 @@ public class AirrServer
                     {
                         isThisSwitch = true;
                         dout.writeUTF(GET_ID);
-                        SwitchIds.add(din.readUTF());
+                        myId = din.readUTF();
+                        SwitchIds.add(myId);
                         ClientSockets.add(ClientSocket);
                         Switches.add(this);
                     }
+                    else if (msgFromSwitchBoard.equals("AREYOUTHERE"))
+                    {
+                        dout.writeUTF("YESIMHERE");
+                    }
+                    else if (msgFromSwitchBoard.equals("SBDETAILSPLS"))
+                    {
 
-                    if(!isThisSwitch)
+                        StringBuilder str = new StringBuilder("");
+
+                        for (iCount = 0; iCount < SwitchIds.size(); iCount++)
+                        {
+                            str.append(SwitchIds.elementAt(iCount).toString().substring(0, 10));
+                            str.append(" ");
+                        }
+
+                        dout.writeUTF(str.toString());
+                    }
+                    else if(!isThisSwitch)
                     {
                         for (iCount = 0; iCount < SwitchIds.size(); iCount++)
                         {
                             synchronized (lock)
                             {
                                 String id = SwitchIds.elementAt(iCount).toString();
-                                if (msgFromSwitchBoard.contains(id.substring(0, 9)))
+                                if (msgFromSwitchBoard.contains(id.substring(0, 10)))
                                 {
                                     AcceptClient ac = Switches.get(iCount);
                                     Socket tSoc = (Socket) ClientSockets.elementAt(iCount);
@@ -96,10 +114,27 @@ public class AirrServer
                                 }
                             }
                         }
+
+                        if(iCount == SwitchIds.size())
+                        {
+                            dout.writeUTF("UNKNOWN");
+                        }
                     }
                 } catch (Exception ex)
                 {
-
+                    for (iCount = 0; iCount < SwitchIds.size(); iCount++)
+                    {
+                        String id = SwitchIds.elementAt(iCount).toString().substring(0, 10);
+                        System.out.println(id+" "+myId);
+                        if(myId.contains(id))
+                        {
+                            System.out.println("inside");
+                            SwitchIds.remove(iCount);
+                            ClientSockets.remove(iCount);
+                            Switches.remove(iCount);
+                            break;
+                        }
+                    }
                     break;
                 }
 
