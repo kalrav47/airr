@@ -10,6 +10,7 @@ public class AirrServer
     private static String message = "";
     private static final String CLIENT_TYPE_SWITCH = "SWITCHBOARD";
     private static final String GET_ID = "TELLMEYOURID";
+    private static final Object lock = new Object();
 
     AirrServer() throws Exception
     {
@@ -75,21 +76,24 @@ public class AirrServer
                     {
                         for (iCount = 0; iCount < SwitchIds.size(); iCount++)
                         {
-                            String id = SwitchIds.elementAt(iCount).toString();
-                            if (msgFromSwitchBoard.contains(id.substring(0,9)))
+                            synchronized (lock)
                             {
-                                AcceptClient ac = Switches.get(iCount);
-                                Socket tSoc = (Socket) ClientSockets.elementAt(iCount);
+                                String id = SwitchIds.elementAt(iCount).toString();
+                                if (msgFromSwitchBoard.contains(id.substring(0, 9)))
+                                {
+                                    AcceptClient ac = Switches.get(iCount);
+                                    Socket tSoc = (Socket) ClientSockets.elementAt(iCount);
 
-                                DataInputStream tdin = new DataInputStream(tSoc.getInputStream());
-                                DataOutputStream tdout = new DataOutputStream(tSoc.getOutputStream());
+                                    DataInputStream tdin = new DataInputStream(tSoc.getInputStream());
+                                    DataOutputStream tdout = new DataOutputStream(tSoc.getOutputStream());
 
-                                tdout.writeUTF(msgFromSwitchBoard);
+                                    tdout.writeUTF(msgFromSwitchBoard);
 
-                                Thread.sleep(10);
+                                    Thread.sleep(10);
 
-                                dout.writeUTF(ac.getMsg());
-                                continue;
+                                    dout.writeUTF(ac.getMsg());
+                                    continue;
+                                }
                             }
                         }
                     }

@@ -24,6 +24,7 @@ public class AirrClientShould
     private static final String id = "id";
     private static DataOutputStream dout;
     private static DataInputStream din;
+    private static String arg;
 
     // constructor
     AirrClientShould()
@@ -56,6 +57,7 @@ public class AirrClientShould
     public static void main(String args[])
     {
         AirrClientShould.getInstance();
+        arg = args[0];
     }
 
     private class StartCommunication extends Thread
@@ -65,9 +67,11 @@ public class AirrClientShould
         {
             try
             {
-                dout.writeUTF("12345678901");
+                String query = "1234567890".concat(arg);
+
+                dout.writeUTF(query);
                 response = din.readUTF();
-                System.out.println("got respnse "+response);
+                System.out.println("Got respnse "+response);
 
             }
             catch (Exception ex)
