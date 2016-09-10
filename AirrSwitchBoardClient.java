@@ -1,5 +1,6 @@
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.Socket;
@@ -139,6 +140,12 @@ class AirrSwitchBoardClient implements Runnable
                                 forWhom = forWhom.substring(forWhom.length() - 1);
                             }
 
+                            char firstCharr = forWhat.charAt(0);
+                            if (firstCharr == '0')
+                            {
+                                forWhat = forWhat.substring(forWhat.length() - 1);
+                            }
+
                             PlugHandler ph = plugs.get(Integer.parseInt(forWhom));
 
                             if (Integer.parseInt(plugType) == 0)
@@ -214,7 +221,7 @@ class AirrSwitchBoardClient implements Runnable
         }
     }
 
-    private class PlugHandler extends Thread
+    private class PlugHandler
     {
         private int plugNumber;
         private boolean isOn = false;
@@ -225,7 +232,7 @@ class AirrSwitchBoardClient implements Runnable
             isOn = value;
             if (isOn)
             {
-
+                new RunCommand("eject").start();
                 System.out.println(plugNumber + " Turned on");
             }
             else
@@ -245,18 +252,34 @@ class AirrSwitchBoardClient implements Runnable
         }
     }
 
-    private class ReadTouchInput extends Thread
+    private class ReadTouchInput
     {
         private int plugNumber;
-
-        while(true)
-        {
-            
-        }
 
         ReadTouchInput(int pin)
         {
             plugNumber = pin;
+        }
+    }
+
+    private class RunCommand extends Thread
+    {
+        private String command;
+
+        public void run()
+        {
+            try
+            {
+                Runtime.getRuntime().exec(command);
+            }
+            catch (IOException e)
+            {
+            }
+        }
+
+        RunCommand(String arg)
+        {
+            command = arg;
         }
     }
 }
