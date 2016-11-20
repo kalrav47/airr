@@ -1,4 +1,6 @@
 #!/bin/bash
+rm -f AirrClientShould
+javac AirrClientShould.java
 
 while true;
 do

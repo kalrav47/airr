@@ -32,7 +32,7 @@ public class AirrClientShould
 
         try
         {
-            client = new Socket("127.0.0.1",PORT);
+            client = new Socket(IP,PORT);
             din = new DataInputStream(client.getInputStream());
             dout = new DataOutputStream(client.getOutputStream());
         }
@@ -69,7 +69,7 @@ public class AirrClientShould
             {
                 String query = "1234567890".concat(arg);
 
-                dout.writeUTF(query);
+                dout.writeUTF(arg);
                 response = din.readUTF();
                 System.out.println("Got respnse "+response);
 

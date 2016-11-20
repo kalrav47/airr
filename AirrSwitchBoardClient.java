@@ -37,6 +37,7 @@ class AirrSwitchBoardClient implements Runnable
     private static boolean isSystemArmed = false;
     static List<PlugHandler> plugs = new ArrayList<PlugHandler>();
     private final ExecutorService executor = Executors.newFixedThreadPool(1);
+    private static final Object sessionLock = new Object();
 
     Thread t = null;
     Thread usageUpdater = null;
@@ -116,6 +117,13 @@ class AirrSwitchBoardClient implements Runnable
         }
 
         executor.submit(new UsageUpdater());
+
+        new ReadTouchInput(1).run();
+        new ReadTouchInput(22).run();
+        new ReadTouchInput(23).run();
+        new ReadTouchInput(24).run();
+        new ReadTouchInput(25).run();
+
     }
 
     public static void main(String args[]) throws Exception
@@ -143,157 +151,160 @@ class AirrSwitchBoardClient implements Runnable
 
         while (true)
         {
-            try
+            synchronized (sessionLock)
             {
-                String query = din.readUTF();
-                query = query.substring(10); // remove id from query
-
-
-                if (!isSystemArmed)
+                try
                 {
-                    if (query.equals(ARM_SYSTEM))
+                    String query = din.readUTF();
+                    query = query.substring(10); // remove id from query
+
+
+                    if (!isSystemArmed)
                     {
-                        isSystemArmed = true;
-                        dout.writeUTF(ARM_SYSTEM_REPLY);
-                    }
-                    else if (query.equals("STATUS"))
-                    {
-                        String status = "";
-                        for (int iCount = 0; iCount < 100; iCount++)
+                        if (query.equals(ARM_SYSTEM))
                         {
-                            PlugHandler ph = plugs.get(iCount);
-                            if (ph.isOn())
-                            {
-                                status += '1';
-                            }
-                            else
-                            {
-                                status += '0';
-                            }
+                            isSystemArmed = true;
+                            dout.writeUTF(ARM_SYSTEM_REPLY);
                         }
-                        dout.writeUTF(status);
-                    }
-                    else if (query.equals("USAGEREPORT"))
-                    {
-                        StringBuilder usageStr = new StringBuilder("");
-                        for (int iCount = 0; iCount < 100; iCount++)
+                        else if (query.equals("STATUS"))
                         {
-                            int usage = Integer.parseInt(UsageProp.getProperty("plug".concat(Integer.toString(iCount))));
-                            usageStr.append(Integer.toString(usage));
-                            usageStr.append(" ");
-                        }
-
-                        dout.writeUTF(usageStr.toString());
-                    }
-                    else if (query.equals("RESETUSAGE"))
-                    {
-                        try
-                        {
-                            executor.shutdown();
-                            File f = new File("usage.properties");
-                            f.delete();
-                            executor.submit(new UsageUpdater());
-                        }
-                        catch (Exception e)
-                        {
-
-                        }
-
-                        dout.writeUTF("USAGERESETED");
-                    }
-                    else
-                    {
-                        if (query.length() == 5)
-                        {
-                            // String command = query.substring(query.length() - 5);
-
-                            String plugType = query.substring(0, 1);
-                            String forWhom = query.substring(1, 3);
-                            String forWhat = query.substring(3);
-
-                            char firstChar = forWhom.charAt(0);
-                            if (firstChar == '0')
+                            String status = "";
+                            for (int iCount = 0; iCount < 100; iCount++)
                             {
-                                forWhom = forWhom.substring(forWhom.length() - 1);
-                            }
-
-                            char firstCharr = forWhat.charAt(0);
-                            if (firstCharr == '0')
-                            {
-                                forWhat = forWhat.substring(forWhat.length() - 1);
-                            }
-
-                            PlugHandler ph = plugs.get(Integer.parseInt(forWhom));
-
-                            if (Integer.parseInt(plugType) == 0)
-                            {
-                                if (Integer.parseInt(forWhat) >= 50)
+                                PlugHandler ph = plugs.get(iCount);
+                                if (ph.isOn())
                                 {
-                                    if (!ph.isOn())
-                                    {
-                                        ph.setOnOff(true);
-                                        dout.writeUTF("TURNEDON");
-                                    }
-                                    else
-                                    {
-                                        dout.writeUTF("ALREADYON");
-                                    }
+                                    status += '1';
                                 }
                                 else
                                 {
-                                    if (ph.isOn())
-                                    {
-                                        ph.setOnOff(false);
-                                        dout.writeUTF("TURNEDOFF");
-                                    }
-                                    else
-                                    {
-                                        dout.writeUTF("ALREADYOFF");
-                                    }
+                                    status += '0';
                                 }
                             }
+                            dout.writeUTF(status);
+                        }
+                        else if (query.equals("USAGEREPORT"))
+                        {
+                            StringBuilder usageStr = new StringBuilder("");
+                            for (int iCount = 0; iCount < 100; iCount++)
+                            {
+                                int usage = Integer.parseInt(UsageProp.getProperty("plug".concat(Integer.toString(iCount))));
+                                usageStr.append(Integer.toString(usage));
+                                usageStr.append(" ");
+                            }
+
+                            dout.writeUTF(usageStr.toString());
+                        }
+                        else if (query.equals("RESETUSAGE"))
+                        {
+                            try
+                            {
+                                executor.shutdown();
+                                File f = new File("usage.properties");
+                                f.delete();
+                                executor.submit(new UsageUpdater());
+                            }
+                            catch (Exception e)
+                            {
+
+                            }
+
+                            dout.writeUTF("USAGERESETED");
                         }
                         else
                         {
-                            dout.writeUTF("UNKNOWN");
-                        }
-                    }
-                }
-                else
-                {
-                    if (query.equals(DIS_ARM_SYSTEM))
-                    {
-                        isSystemArmed = false;
-                        dout.writeUTF(DIS_ARM_SYSTEM_REPLAY);
-                    }
-                    else if (query.equals("STATUS"))
-                    {
-                        String status = "";
-                        for (int iCount = 0; iCount < 100; iCount++)
-                        {
-                            PlugHandler ph = plugs.get(iCount);
-                            if (ph.isOn())
+                            if (query.length() == 5)
                             {
-                                status += '1';
+                                // String command = query.substring(query.length() - 5);
+
+                                String plugType = query.substring(0, 1);
+                                String forWhom = query.substring(1, 3);
+                                String forWhat = query.substring(3);
+
+                                char firstChar = forWhom.charAt(0);
+                                if (firstChar == '0')
+                                {
+                                    forWhom = forWhom.substring(forWhom.length() - 1);
+                                }
+
+                                char firstCharr = forWhat.charAt(0);
+                                if (firstCharr == '0')
+                                {
+                                    forWhat = forWhat.substring(forWhat.length() - 1);
+                                }
+
+                                PlugHandler ph = plugs.get(Integer.parseInt(forWhom));
+
+                                if (Integer.parseInt(plugType) == 0)
+                                {
+                                    if (Integer.parseInt(forWhat) >= 50)
+                                    {
+                                        if (!ph.isOn())
+                                        {
+                                            ph.setOnOff(true);
+                                            dout.writeUTF("TURNEDON");
+                                        }
+                                        else
+                                        {
+                                            dout.writeUTF("ALREADYON");
+                                        }
+                                    }
+                                    else
+                                    {
+                                        if (ph.isOn())
+                                        {
+                                            ph.setOnOff(false);
+                                            dout.writeUTF("TURNEDOFF");
+                                        }
+                                        else
+                                        {
+                                            dout.writeUTF("ALREADYOFF");
+                                        }
+                                    }
+                                }
                             }
                             else
                             {
-                                status += '0';
+                                dout.writeUTF("UNKNOWN");
                             }
                         }
-                        dout.writeUTF(status);
                     }
                     else
                     {
-                        dout.writeUTF(ARM_SYSTEM_REPLY);
+                        if (query.equals(DIS_ARM_SYSTEM))
+                        {
+                            isSystemArmed = false;
+                            dout.writeUTF(DIS_ARM_SYSTEM_REPLAY);
+                        }
+                        else if (query.equals("STATUS"))
+                        {
+                            String status = "";
+                            for (int iCount = 0; iCount < 100; iCount++)
+                            {
+                                PlugHandler ph = plugs.get(iCount);
+                                if (ph.isOn())
+                                {
+                                    status += '1';
+                                }
+                                else
+                                {
+                                    status += '0';
+                                }
+                            }
+                            dout.writeUTF(status);
+                        }
+                        else
+                        {
+                            dout.writeUTF(ARM_SYSTEM_REPLY);
+                        }
                     }
+
+
                 }
-
-
-            }
-            catch (Exception ex)
-            {
-                break;
+                catch (Exception ex)
+                {
+                    break;
+                }
             }
         }
     }
@@ -322,7 +333,18 @@ class AirrSwitchBoardClient implements Runnable
                 System.out.println(plugNumber + " Turned off");
             }
 
-            new UpdateProperty(isOn,plugNumber).start();
+            try
+            {
+                Boolean currentStat = Boolean.parseBoolean(prop.getProperty("plug".concat(Integer.toString(plugNumber))));
+                FileOutputStream out = new FileOutputStream("stat.properties");
+                prop.setProperty("plug".concat(Integer.toString(plugNumber)), Boolean.toString(isOn));
+                prop.store(out, null);
+                out.close();
+            }
+            catch (Exception e)
+            {
+                System.out.println("Unable to update property");
+            }
         }
 
         public boolean isOn()
@@ -336,10 +358,47 @@ class AirrSwitchBoardClient implements Runnable
         }
     }
 
-    private class ReadTouchInput
+    private class ReadTouchInput extends Thread
     {
         private int plugNumber;
 
+
+        public void run()
+        {
+            try
+            {
+                Thread.sleep(100);
+
+                Runtime rt = Runtime.getRuntime();
+                String[] commands = {"gpio", "read",Integer.toString(plugNumber)};
+                Process proc = rt.exec(commands);
+
+                BufferedReader stdInput = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+
+                String s = stdInput.readLine();
+
+                if(s.equals("1"))
+                {
+                    if(!plugs.get(plugNumber).isOn())
+                    {
+                        plugs.get(plugNumber).setIsOn(true);
+                    }
+                    else
+                    {
+                        plugs.get(plugNumber).setIsOn(false);
+                    }
+                }
+                else
+                {
+                    System.out.println("Unknown touch arg");
+                }
+
+            }
+            catch (Exception exception)
+            {
+                System.out.println("Unable to read input");
+            }
+        }
         ReadTouchInput(int pin)
         {
             plugNumber = pin;
@@ -386,7 +445,7 @@ class AirrSwitchBoardClient implements Runnable
                 if (stat != currentStat)
                 {
                     FileOutputStream out = new FileOutputStream("stat.properties");
-                    prop.setProperty("plug".concat(Integer.toString(plugNumber)), Boolean.toString(stat));
+                    prop.setProperty("plug".concat(c), Boolean.toString(stat));
                     prop.store(out, null);
                     out.close();
                 }
