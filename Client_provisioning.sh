@@ -8,6 +8,31 @@ sync
 sync
 sync
 
+#copy files
+cd executables
+cp export_gpio.sh ~/
+chmod +x ~/export_gpio.sh
+cp client ~/
+chmod +x ~/client
+cp client.sh ~/
+chmod +x ~/client.sh
+cd ../
+touch ~/stat.txt
+touch ~/usage.txt
+
+crontab -l > mycron
+echo "@reboot /root/export_gpio.sh" >> mycron
+echo "@reboot /root/client.sh" >> mycron
+crontab mycron
+rm mycron
+
+sync
+sync
+sync
+
+#create id file
+echo $2 | md5sum | grep -o '[[:digit:]]' | head -n 10 | tr -d '\n'> id
+
 #disable uart
 systemctl mask serial-getty@ttyS0.service
 systemctl stop serial-getty@ttyS0.service
