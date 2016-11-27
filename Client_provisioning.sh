@@ -1,13 +1,7 @@
 # configure wifi
-ssid=`echo $1 | sha256sum | base64 | head -c 16`
-password=`echo $1 | sha384sum | base64 | tail -c 61 | head -c 58`
 cd wifi_config
-cp startwificonnections.sh /root/
-chmod +x /root/startwificonnections.sh
-crontab -l > mycron
-echo "@reboot /root/startwificonnections.sh "${ssid}" "${password}"" >> mycron
-crontab mycron
-rm mycron
+chmod +x install_wifi.sh
+sh install_wifi.sh $1
 cd ../
 
 sync
