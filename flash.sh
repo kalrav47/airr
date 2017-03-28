@@ -1,3 +1,5 @@
+#sudo ./flash.sh 0 31344D15E9
+
 cd ../CHIP-SDK/CHIP-buildroot/output/images/
 rm -rf tmp-rootfs
 mkdir tmp-rootfs
@@ -25,6 +27,10 @@ if [ "$1" = "0" ]; then
 	cp /home/kalravparsana/airr/executables/startBridgeServer.sh usr/sbin/startBridgeServer
 	chmod u+x usr/sbin/startBridgeServer
 	cp /home/kalravparsana/airr/executables/server.sh usr/sbin/configAndStartServer
+
+	sed -i 's/airr/'"$ssid"'/g' usr/sbin/configAndStartServer
+	sed -i 's/12345678/'"$password"'/g' usr/sbin/configAndStartServer
+
 	chmod u+x usr/sbin/configAndStartServer
 	echo "configAndStartServer &" > usr/sbin/airr_init
 
