@@ -1,5 +1,5 @@
 while true;do
-ping -c 1 google.com >/dev/null 2>&1
+ping -c 1 192.168.0.1 >/dev/null 2>&1
 online=$?
 if [ $online -eq 0 ]; then
     echo "Online"
@@ -20,8 +20,8 @@ else
         echo "Type = wifi" >> /var/lib/connman/$1-psk.config
         echo "Name = $1" >> /var/lib/connman/$1-psk.config
         echo "Passphrase = $2" >> /var/lib/connman/$1-psk.config
-        sleep 25
+        sleep 30
 fi
-sleep 5
+sleep 30
 done
 

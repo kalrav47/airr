@@ -1,5 +1,5 @@
 #!/bin/bash
 while true;do
-sudo ./client
+client
 sleep 1
 done
