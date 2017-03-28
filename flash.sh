@@ -57,7 +57,11 @@ if [ "$1" = "0" ]; then
 	mkdir -p root/certs
 	wget https://s3-ap-southeast-2.amazonaws.com/kalrav1/"$2".cert.pem -P root/certs
 	wget https://s3-ap-southeast-2.amazonaws.com/kalrav1/"$2".private.key -P root/certs
-	wget https://s3-ap-southeast-2.amazonaws.com/kalrav1/"$2".public.key -P root/certs
+	mv root/certs/"$2".cert.pem root/certs/certificate.pem.crt
+	mv root/certs/"$2".private.key root/certs/private.pem.key
+	cp /home/kalravparsana/airr/certs/root-CA.crt root/certs
+	echo $2 > root/certs/clientID
+
 		
 else
 	echo "client selected";
