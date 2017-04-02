@@ -1,3 +1,5 @@
+#!/bin/bash
+
 	connmanctl enable wifi > /dev/null 2>&1
         connmanctl scan wifi > /dev/null 2>&1
         ssid=`connmanctl services | grep $1 | tail -1 | grep -oE '[^ ]+$'`
@@ -13,4 +15,6 @@
         echo "Type = wifi" >> /var/lib/connman/$1-psk.config
         echo "Name = $1" >> /var/lib/connman/$1-psk.config
         echo "Passphrase = $2" >> /var/lib/connman/$1-psk.config
-	
+	sync
+	sync
+	sync	

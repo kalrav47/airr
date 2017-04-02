@@ -48,7 +48,7 @@ if [ "$1" = "0" ]; then
 
 	cp /home/kalravparsana/airr/executables/awsConnect.sh usr/sbin/awsConnect
 	chmod u+x usr/sbin/awsConnect
-	echo "awsConnect &" >> usr/sbin/airr_init
+	#echo "awsConnect &" >> usr/sbin/airr_init
 
 	cp /home/kalravparsana/airr/executables/timeChecker.sh usr/sbin/timeCheck
 	chmod u+x usr/sbin/timeCheck
@@ -69,7 +69,7 @@ else
 	cp /home/kalravparsana/airr/wifi_config/wifi_connect.sh usr/sbin/connect_wifi
 	chmod +x usr/sbin/connect_wifi
 	#echo "sh /etc/wifi_connect.sh $ssid $password &" >> etc/airr_init.sh
-	echo "connect_wifi airr 12345678 &" > usr/sbin/airr_init
+	echo "connect_wifi $ssid $password &" > usr/sbin/airr_init
 
 	cp /home/kalravparsana/airr/executables/export_gpio.sh usr/sbin/exportGPIO
 	chmod +x usr/sbin/exportGPIO

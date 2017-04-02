@@ -1,4 +1,6 @@
+#!/bin/bash
+
 while true;do
-server
+bridgeServer
 sleep 1
 done

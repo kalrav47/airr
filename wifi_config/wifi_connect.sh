@@ -1,3 +1,4 @@
+#!/bin/bash
 while true;do
 ping -c 1 192.168.0.1 >/dev/null 2>&1
 online=$?
@@ -20,6 +21,9 @@ else
         echo "Type = wifi" >> /var/lib/connman/$1-psk.config
         echo "Name = $1" >> /var/lib/connman/$1-psk.config
         echo "Passphrase = $2" >> /var/lib/connman/$1-psk.config
+	sync
+	sync
+	sync
         sleep 30
 fi
 sleep 30
