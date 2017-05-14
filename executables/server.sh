@@ -1,4 +1,7 @@
-#!/bin/bash
+#!/bin/sh
+
+sleep 15
+
 while true;do
 R=`ifconfig | head -10 | tail -1 | grep tether`
 if [ $? -eq 0 ]; then
@@ -14,6 +17,3 @@ done
 
 touch /tmp/apStarted
 
-startServer &
-startBridgeServer &
-awsConnect &

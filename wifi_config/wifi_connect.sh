@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 while true;do
 ping -c 1 192.168.0.1 >/dev/null 2>&1
 online=$?
@@ -25,6 +25,8 @@ else
 	sync
 	sync
         sleep 30
+	sync
+	sync
 fi
 sleep 30
 done

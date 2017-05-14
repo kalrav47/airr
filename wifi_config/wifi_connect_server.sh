@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 	connmanctl enable wifi > /dev/null 2>&1
         connmanctl scan wifi > /dev/null 2>&1
